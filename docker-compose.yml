@@ -1,0 +1,20 @@
+version: "3.8" # Docker Compose 的文件格式版本
+
+services: # 定义我们要运行的服务集合
+  db: # 服务名称，我们叫它 'db' (数据库)
+    image: postgres:15-alpine # 使用的镜像。Alpine 是一个超轻量级的 Linux 发行版，适合容器
+    container_name: slot-machine-db # 给容器起个好听的名字，方便我们在终端里查看
+    ports:
+      - "5432:5432" # 端口映射: "主机端口:容器端口"。我们要通过电脑的 5432 访问容器里的数据库
+    environment: # 环境变量，Postgres 镜像启动时需要这些配置
+      POSTGRES_USER: admin # 数据库用户名
+      POSTGRES_PASSWORD: password123 # 数据库密码 (开发环境简单点，生产环境不能这么写)
+      POSTGRES_DB: slot_machine # 默认创建的数据库名称
+    volumes:
+      - ./data/postgres:/var/lib/postgresql/data # 数据卷挂载。把容器里的数据存到你电脑的 ./data 目录下，防止容器删除后数据丢失
+    networks:
+      - game-network # 将服务加入到自定义网络
+
+networks: # 定义网络
+  game-network: # 创建一个名为 game-network 的虚拟网络，让我们的服务(db, backend, frontend)能互相通信
+    driver: bridge
