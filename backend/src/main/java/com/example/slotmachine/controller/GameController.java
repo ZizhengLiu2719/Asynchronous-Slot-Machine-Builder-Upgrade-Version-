@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.slotmachine.model.BattleResult;
 import com.example.slotmachine.model.GameSnapshot;
 import com.example.slotmachine.model.User;
 import com.example.slotmachine.service.GameService;
@@ -63,5 +64,21 @@ public class GameController {
             return null; 
         }
         return opponent;
+    }
+
+        // 5. 战斗接口 (核心)
+    // 请求: POST /api/battle
+    // Body: { "inventory": "['Sword', ...]", "round": 1 }
+    @PostMapping("/battle")
+    public BattleResult fight(@RequestBody Map<String, Object> payload) {
+        String inventoryJson = payload.get("inventory").toString();
+        int round = Integer.parseInt(payload.get("round").toString());
+        
+        // 1. 找对手
+        GameSnapshot opponent = gameService.findOpponent(round);
+        String opponentInventory = (opponent != null) ? opponent.getInventoryJson() : null;
+        
+        // 2. 计算战斗
+        return gameService.calculateBattle(inventoryJson, opponentInventory);
     }
 }
