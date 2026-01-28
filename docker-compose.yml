@@ -1,20 +1,52 @@
-version: "3.8" # 告诉建筑队：我们要用 3.8 版的“方言”来沟通
+version: "3.8"
 
-services: # 这里列出我们要雇佣的所有“员工”
-  db: # 这是负责记账的“账房先生”，咱们叫他 db
-    image: postgres:15-alpine # 账房先生的出身：Postgres家族的第15代传人，穿着轻便的登山装(Alpine)，跑得快！
-    container_name: slot-machine-db # 给他的工位贴个大名牌：老虎机数据库
+services:
+  # 1. 数据库服务 (保持不变)
+  db:
+    image: postgres:15-alpine
+    container_name: slot-machine-db
     ports:
-      - "5432:5432" # 传话筒：对着你电脑的 5432 号洞喊话，声音会直接传到玻璃房子里账房先生耳朵贴着的 5432 号位置
-    environment: # 入职时的私密小纸条
-      POSTGRES_USER: admin # 纸条写着：以后大家叫你“管理员(admin)”
-      POSTGRES_PASSWORD: password123 # 纸条写着：进你房间的暗号是“password123”
-      POSTGRES_DB: slot_machine # 纸条写着：上班第一件事，拿个新本子，名字写上“slot_machine”，以后账都记这里
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password123
+      POSTGRES_DB: slot_machine
     volumes:
-      - ./data/postgres:/var/lib/postgresql/data # 神奇滑梯：账房先生在屋里写的账本，会顺着滑梯直接滑到你地板上的 ./data 目录，房子炸了账本也不会丢
+      - ./data/postgres:/var/lib/postgresql/data
     networks:
-      - game-network # 给账房先生发个对讲机，频道叫“游戏网络”，以后方便跟其他人通话
+      - game-network
+    restart: always
 
-networks: # 定义公司的内部对讲机频道
-  game-network: # 创建一个叫 game-network 的频道，让大家都能在里面聊天
+  # 2. 后端服务 (新增)
+  backend:
+    build: ./backend # 告诉它去 backend 文件夹找 Dockerfile 编译
+    container_name: slot-machine-backend
+    ports:
+      - "8080:8080" # 映射端口，这样前端才能通过 localhost:8080 访问到
+    depends_on:
+      - db # 必须等 db 启动了再启动
+    environment:
+      # 这里的 host 必须填 'db'，因为在 Docker 网络里，服务名就是域名
+      SPRING_DATASOURCE_URL: jdbc:postgresql://db:5432/slot_machine
+      SPRING_DATASOURCE_USERNAME: admin
+      SPRING_DATASOURCE_PASSWORD: password123
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+    networks:
+      - game-network
+    restart: always
+
+  # 3. 前端服务 (新增)
+  frontend:
+    build: ./frontend # 去 frontend 文件夹找 Dockerfile
+    container_name: slot-machine-frontend
+    ports:
+      - "80:80" # 直接映射到电脑的 80 端口（默认网页端口）
+    depends_on:
+      - backend
+    networks:
+      - game-network
+    restart: always
+
+networks:
+  game-network:
     driver: bridge
