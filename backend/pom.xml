@@ -4,14 +4,14 @@
     xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <!-- 项目基本信息 -->
+    <!-- 机器人的身份证信息 -->
     <groupId>com.example</groupId>
     <artifactId>slot-machine-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
     <name>slot-machine-backend</name>
     <description>Backend for Slot Machine Game</description>
 
-    <!-- 继承 Spring Boot 父工程，这能帮我们要版本管理 -->
+    <!-- 豪华全家桶套餐：直接选用 Spring Boot 3.2.2，这样所有零件尺寸都完美匹配，不用一个个挑 -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -24,26 +24,26 @@
     </properties>
 
     <dependencies>
-        <!-- 1. Web Starter: 提供 REST API 功能 (自带 Tomcat) -->
+        <!-- 1. 嘴巴和耳朵 (Web Starter)：让机器人能听懂浏览器的请求，也能说话回应 (自带 Tomcat 小喇叭) -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- 2. JPA Starter: 提供数据库操作功能 (Hibernate) -->
+        <!-- 2. 大脑皮层 (JPA Starter)：让机器人能理解“对象”，把复杂的 Java 数据自动变成数据库表格 -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-jpa</artifactId>
         </dependency>
 
-        <!-- 3. PostgreSQL Driver: 连接 Postgres 数据库的驱动 -->
+        <!-- 3. 翻译机 (PostgreSQL Driver)：机器人说 Java 语，账房先生说 SQL 语，这个芯片负责实时翻译 -->
         <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
         </dependency>
 
-        <!-- 4. Lombok: 帮你少写 Getter/Setter 代码的神器 -->
+        <!-- 4. 自动写字笔 (Lombok)：偷懒神器，只要贴个标签，它就自动帮你写完那些枯燥重复的代码 -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>

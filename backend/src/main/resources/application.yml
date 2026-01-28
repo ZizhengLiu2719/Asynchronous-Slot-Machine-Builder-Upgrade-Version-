@@ -1,24 +1,24 @@
 server:
-  port: 8080 # 后端运行在 8080 端口
+  port: 8080 # 机器人，请你在 8080 号柜台接待客人 (数据库在 5432，别搞混了)
 
 spring:
   application:
     name: slot-machine-backend
   
-  # 数据库连接配置
+  # 藏宝图：告诉机器人去哪里找账房先生
   datasource:
-    # 注意这里用 localhost，因为我们在本地运行 Java，连接 Docker 映射出来的 5432 端口
+    # 嘿，兄弟，出门左转找本机 (localhost) 的 5432 号洞，里面有个账本叫 slot_machine
     url: jdbc:postgresql://localhost:5432/slot_machine
-    username: admin
-    password: password123
+    username: admin # 进门暗号：我是管理员
+    password: password123 # 进门密码：password123 (对不上暗号账房先生不理你)
     driver-class-name: org.postgresql.Driver
-
-  # JPA (Hibernate) 配置
+  
+  # 机器人的装修技能
   jpa:
     hibernate:
-      # 核心设置：自动根据 Java 类更新数据库表结构 (开发神器，生产慎用)
+      # 如果我设计了新家具(Java类)，请自动帮我在账房里造出来(建表)。如果是旧的就修补一下(update)
       ddl-auto: update 
-    show-sql: true # 在控制台打印 SQL 语句，方便调试
+    show-sql: true # 大声朗读模式：机器人每做一件事，都要大声把密语(SQL)念出来，防止它偷懒
     properties:
       hibernate:
-        format_sql: true # 格式化 SQL，好看一点
+        format_sql: true # 念的时候要抑扬顿挫(格式化)，好听一点
