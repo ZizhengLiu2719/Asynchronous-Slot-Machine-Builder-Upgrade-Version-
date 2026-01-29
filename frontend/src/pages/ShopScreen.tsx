@@ -111,11 +111,25 @@ export default function ShopScreen() {
 
 // Helper: Turns names into Emoji Pictures
 function getItemIcon(name: string) {
+    // Weapons
     if (name.includes("Sword")) return "⚔️";
+    if (name.includes("Dagger")) return "🗡️";
+    if (name.includes("Crossbow")) return "🏹";
+    
+    // Shields/Defense
     if (name.includes("Shield")) return "🛡️";
-    if (name.includes("Cookie")) return "🍪";
-    if (name.includes("Dart")) return "🎯";
     if (name.includes("Buckler")) return "🌰";
+    
+    // Food/Nature
+    if (name.includes("Cookie")) return "🍪";
+    if (name.includes("Banana")) return "🍌";
+    if (name.includes("Mushroom")) return "🍄";
+    if (name.includes("Rock")) return "🪨";
+    
+    // Magic/Accessories
+    if (name.includes("Wand")) return "🪄";
+    if (name.includes("Ring")) return "💍";
     if (name.includes("Fang")) return "🧛";
+    
     return "📦";
 }

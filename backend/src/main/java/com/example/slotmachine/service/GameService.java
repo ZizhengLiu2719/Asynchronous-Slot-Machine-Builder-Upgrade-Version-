@@ -38,27 +38,85 @@ public class GameService {
                 });
     }
 
+    // --- Item System Definition ---
+    private static class ItemDef {
+        String name;
+        String type; // WEAPON, SHIELD, MAGIC, FOOD, NATURE, ACCESSORY
+        int baseAtk;
+        int baseDef;
+        int tier;
+        String description;
+
+        public ItemDef(String name, String type, int baseAtk, int baseDef, int tier, String description) {
+            this.name = name;
+            this.type = type;
+            this.baseAtk = baseAtk;
+            this.baseDef = baseDef;
+            this.tier = tier;
+            this.description = description;
+        }
+    }
+
+    private static final List<ItemDef> ALL_ITEMS = new ArrayList<>();
+    
+    static {
+        // Tier 1 (Basic)
+        ALL_ITEMS.add(new ItemDef("Dagger", "WEAPON", 3, 0, 1, "Small but sharp."));
+        ALL_ITEMS.add(new ItemDef("WoodenShield", "SHIELD", 0, 3, 1, "Basic protection."));
+        ALL_ITEMS.add(new ItemDef("Banana", "FOOD", 0, 2, 1, "Healthy snack. (+2 HP)"));
+        ALL_ITEMS.add(new ItemDef("Rock", "NATURE", 1, 1, 1, "Solid reliability."));
+
+        // Tier 2 (Advanced - Synergies)
+        ALL_ITEMS.add(new ItemDef("IronSword", "WEAPON", 5, 0, 2, "Standard soldier gear."));
+        ALL_ITEMS.add(new ItemDef("KiteShield", "SHIELD", 0, 5, 2, "Good coverage."));
+        ALL_ITEMS.add(new ItemDef("Crossbow", "WEAPON", 4, 0, 2, "Crit chance? +2 ATK if you have another Weapon."));
+        ALL_ITEMS.add(new ItemDef("Mushroom", "FOOD", 0, 3, 2, "Magic fungus. +1 DEF for every Food."));
+
+        // Tier 3 (Epic - High Scaling)
+        ALL_ITEMS.add(new ItemDef("GoldenSword", "WEAPON", 8, 0, 3, "Shiny and deadly."));
+        ALL_ITEMS.add(new ItemDef("PlatinumShield", "SHIELD", 0, 8, 3, "Unbreakable."));
+        ALL_ITEMS.add(new ItemDef("MagicWand", "MAGIC", 3, 0, 3, "Arcane power. +3 ATK for every Magic item."));
+        ALL_ITEMS.add(new ItemDef("VampireRing", "ACCESSORY", 0, 0, 3, "Life steal. +1 Heal (Def) per Weapon."));
+    }
+
+    private ItemDef getItem(String name) {
+        return ALL_ITEMS.stream()
+                .filter(i -> i.name.equals(name))
+                .findFirst()
+                .orElse(new ItemDef(name, "UNKNOWN", 1, 1, 1, "Mystery Item"));
+    }
+
     // This fills the shop with toys based on how many rounds we played
     public List<String> refreshShop(int round) {
-        // Simple toys for beginners
-        String[] poolTier1 = {"Sword", "Shield", "Cookie", "Dart", "Buckler"};
-        // Cooler toys for pros
-        String[] poolTier2 = {"VampireFang", "FrostStaff", "SpikedShield"};
         List<String> shopItems = new ArrayList<>();
-        Random random = new Random(); // Magic dice
+        Random random = new Random();
 
-        // We pick 5 items to show in the shop
         for (int i = 0; i < 5; i++) {
-            if (round <= 3) {
-                // If the game just started, only show simple toys
-                shopItems.add(poolTier1[random.nextInt(poolTier1.length)]);
+            // Determine Tier based on round
+            int maxTier = 1;
+            if (round >= 4) maxTier = 2;
+            if (round >= 7) maxTier = 3;
+
+            // Roll for tier
+            int rolledTier = 1;
+            int roll = random.nextInt(100);
+            
+            if (maxTier == 3) {
+                if (roll < 20) rolledTier = 3; // 20% Epic
+                else if (roll < 60) rolledTier = 2; // 40% Rare
+                else rolledTier = 1; // 40% Common
+            } else if (maxTier == 2) {
+                if (roll < 40) rolledTier = 2; // 40% Rare
+                else rolledTier = 1; // 60% Common
+            }
+
+            final int finalTier = rolledTier;
+            List<ItemDef> pool = ALL_ITEMS.stream().filter(item -> item.tier == finalTier).toList();
+            
+            if (!pool.isEmpty()) {
+                shopItems.add(pool.get(random.nextInt(pool.size())).name);
             } else {
-                // Later on, flip a coin to decide if we show a cool toy or a simple one
-                if (random.nextBoolean()) {
-                    shopItems.add(poolTier2[random.nextInt(poolTier2.length)]);
-                } else {
-                    shopItems.add(poolTier1[random.nextInt(poolTier1.length)]);
-                }
+                shopItems.add("Rock"); // Fallback
             }
         }
         return shopItems;
@@ -114,10 +172,10 @@ public class GameService {
             List<String> opponentPool;
             
             if (opponentInventoryJson == null || opponentInventoryJson.isEmpty()) {
-                // If nobody is there to fight, we make a Robot with Swords
+                // If nobody is there to fight, we make a Training Dummy with Daggers
                 opponentPool = new ArrayList<>();
-                for(int i=0; i<5; i++) opponentPool.add("Sword");
-                logs.add("No opponent found. Fighting a Robot...");
+                for(int i=0; i<5; i++) opponentPool.add("Dagger");
+                logs.add("No opponent found. Fighting a Training Dummy...");
             } else {
                 opponentPool = objectMapper.readValue(opponentInventoryJson, new TypeReference<List<String>>(){});
                 logs.add("Opponent found!");
@@ -131,10 +189,13 @@ public class GameService {
             result.setOpponentGrid(opponentGrid);
 
             // 3. Count the points (Attack and Defense)
-            int playerAtk = calculateAtk(playerGrid);
-            int playerDef = calculateDef(playerGrid);
-            int opponentAtk = calculateAtk(opponentGrid);
-            int opponentDef = calculateDef(opponentGrid);
+            int[] playerStats = calculateGridStats(playerGrid);
+            int[] opponentStats = calculateGridStats(opponentGrid);
+
+            int playerAtk = playerStats[0];
+            int playerDef = playerStats[1];
+            int opponentAtk = opponentStats[0];
+            int opponentDef = opponentStats[1];
 
             result.setPlayerStats("ATK: " + playerAtk + " | DEF: " + playerDef);
             result.setOpponentStats("ATK: " + opponentAtk + " | DEF: " + opponentDef);
@@ -180,25 +241,44 @@ public class GameService {
         return grid;
     }
 
-    // Helper: Count how much attack power we have
-    private int calculateAtk(List<String> grid) {
+    // New Helper: Calculate stats with Synergies!
+    private int[] calculateGridStats(List<String> grid) {
         int atk = 0;
-        for (String item : grid) {
-            if ("Sword".equals(item)) atk += 5;
-            if ("Dart".equals(item)) atk += 3;
-            if ("VampireFang".equals(item)) atk += 4;
-        }
-        return atk;
-    }
-
-    // Helper: Count how much defense power we have
-    private int calculateDef(List<String> grid) {
         int def = 0;
-        for (String item : grid) {
-            if ("Shield".equals(item)) def += 5;
-            if ("Buckler".equals(item)) def += 3;
-            if ("SpikedShield".equals(item)) def += 6;
+        
+        List<ItemDef> items = new ArrayList<>();
+        for(String name : grid) items.add(getItem(name));
+
+        // First pass: Base stats
+        for(ItemDef item : items) {
+            atk += item.baseAtk;
+            def += item.baseDef;
         }
-        return def;
+
+        // Second pass: Synergies
+        for(ItemDef item : items) {
+            if ("Crossbow".equals(item.name)) {
+                // +2 ATK if another Weapon exists
+                long weaponCount = items.stream().filter(i -> "WEAPON".equals(i.type)).count();
+                if (weaponCount > 1) atk += 2;
+            }
+            if ("Mushroom".equals(item.name)) {
+                // +1 DEF per Food (including itself)
+                long foodCount = items.stream().filter(i -> "FOOD".equals(i.type)).count();
+                def += (int) foodCount;
+            }
+            if ("MagicWand".equals(item.name)) {
+                // +3 ATK per Magic item
+                long magicCount = items.stream().filter(i -> "MAGIC".equals(i.type)).count();
+                atk += (int) magicCount * 3;
+            }
+            if ("VampireRing".equals(item.name)) {
+                // +1 DEF (Heal) per Weapon
+                long weaponCount = items.stream().filter(i -> "WEAPON".equals(i.type)).count();
+                def += (int) weaponCount;
+            }
+        }
+        
+        return new int[]{atk, def};
     }
 }
