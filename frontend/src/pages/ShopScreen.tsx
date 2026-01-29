@@ -5,23 +5,28 @@ import { useGame } from '../context/GameContext';
 
 export default function ShopScreen() {
     const navigate = useNavigate();
+    // Get tools from our game box
     const { gold, lives, inventory, addToInventory, removeFromInventory } = useGame();
     const [shopItems, setShopItems] = useState<string[]>([]);
     const round = localStorage.getItem('round') || '1';
 
+    // Ask the shopkeeper: "What do you have today?"
     const fetchShop = useCallback(() => {
         axios.get(`http://localhost:8080/api/shop?round=${round}`)
             .then(res => setShopItems(res.data))
             .catch(err => console.error(err));
     }, [round]);
 
+    // When we walk into the shop, look at the items
     useEffect(() => {
         fetchShop();
     }, [fetchShop]);
 
+    // Ready to fight!
     const handleStartBattle = async () => {
         const userId = localStorage.getItem('userId');
         try {
+            // Save our bag before leaving
             await axios.post('http://localhost:8080/api/snapshot', {
                 userId: userId, round: round,
                 inventory: JSON.stringify(inventory), stats: "{}"
@@ -29,13 +34,13 @@ export default function ShopScreen() {
             navigate('/battle');
         } catch (e) {
             console.error(e);
-            alert("上传快照失败！");
+            alert("Failed to save game!");
         }
     };
 
     return (
         <div style={{ maxWidth: 800, margin: '0 auto', textAlign: 'left' }}>
-            {/* 顶部状态栏 */}
+            {/* Top Bar: Shows Round, Money, and Hearts */}
             <header className="card" style={{
                 display: 'flex', justifyContent: 'space-between', alignItems: 'center',
                 marginBottom: 30, background: '#222', borderColor: 'gold'
@@ -47,11 +52,11 @@ export default function ShopScreen() {
                 </div>
             </header>
 
-            {/* 商店区域 */}
+            {/* Shop Area: Buy things here */}
             <div className="card" style={{ marginBottom: 30 }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 15 }}>
-                    <h3 style={{ margin: 0 }}>🎁 商店 (3金币)</h3>
-                    <button onClick={fetchShop} style={{ fontSize: '0.8em', padding: '5px 10px' }}>🎲 刷新 (1G)</button>
+                    <h3 style={{ margin: 0 }}>🎁 SHOP (3 Gold)</h3>
+                    <button onClick={fetchShop} style={{ fontSize: '0.8em', padding: '5px 10px' }}>🎲 REROLL (1G)</button>
                 </div>
                 <div style={{ display: 'flex', gap: 15, flexWrap: 'wrap' }}>
                     {shopItems.map((item, index) => (
@@ -67,9 +72,9 @@ export default function ShopScreen() {
                 </div>
             </div>
 
-            {/* 库存区域 */}
+            {/* Backpack Area: Sell things here */}
             <div className="card" style={{ marginBottom: 30, background: '#1a1a1a' }}>
-                <h3 style={{ marginTop: 0 }}>🎒 背包 ({inventory.length}/20)</h3>
+                <h3 style={{ marginTop: 0 }}>🎒 BACKPACK ({inventory.length}/20)</h3>
                 <div style={{
                     display: 'grid', gridTemplateColumns: 'repeat(10, 1fr)', gap: 8
                 }}>
@@ -79,11 +84,11 @@ export default function ShopScreen() {
                             display: 'flex', alignItems: 'center', justifyContent: 'center',
                             cursor: 'pointer', background: '#2e3b2e', fontSize: 20,
                             position: 'relative'
-                        }} title="点击卖出">
+                        }} title="Click to Sell">
                             {getItemIcon(item)}
                         </div>
                     ))}
-                    {/* 空格子 */}
+                    {/* Empty Slots */}
                     {[...Array(20 - inventory.length)].map((_, i) => (
                         <div key={`empty-${i}`} style={{
                             aspectRatio: '1/1', border: '2px dashed #444',
@@ -91,20 +96,20 @@ export default function ShopScreen() {
                         }} />
                     ))}
                 </div>
-                <p style={{ fontSize: '0.8em', color: '#666', marginTop: 10 }}>* 点击绿色格子卖出装备</p>
+                <p style={{ fontSize: '0.8em', color: '#666', marginTop: 10 }}>* Click green items to SELL</p>
             </div>
 
             <button onClick={handleStartBattle} style={{
                 width: '100%', padding: 20, fontSize: 24,
                 background: '#ff4444', borderColor: '#ff0000', textShadow: '1px 1px black'
             }}>
-                ⚔️ 进 入 战 斗
+                ⚔️ F I G H T !
             </button>
         </div>
     );
 }
 
-// 辅助函数：把文字转成 Emoji 图标
+// Helper: Turns names into Emoji Pictures
 function getItemIcon(name: string) {
     if (name.includes("Sword")) return "⚔️";
     if (name.includes("Shield")) return "🛡️";

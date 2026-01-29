@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useGame } from '../context/GameContext';
 
+// This is the Report Card we get from the server
 interface BattleResult {
     playerGrid: string[]; opponentGrid: string[];
     playerStats: string; opponentStats: string;
@@ -14,40 +15,51 @@ export default function BattleScreen() {
     const { inventory, updateGold, updateLives, lives } = useGame();
     const [loading, setLoading] = useState(true);
     const [result, setResult] = useState<BattleResult | null>(null);
-    const [displayGrid, setDisplayGrid] = useState<string[]>(Array(9).fill("❓"));
+    const [displayGrid, setDisplayGrid] = useState<string[]>(Array(9).fill("❓")); // Mystery boxes
     const round = localStorage.getItem('round') || '1';
     const hasStarted = useRef(false);
 
     useEffect(() => {
+        // Only start the fight once!
         if (hasStarted.current) return;
         hasStarted.current = true;
 
         const startBattle = async () => {
             try {
+                // Send our backpack to the server and ask: "Did I win?"
                 const response = await axios.post('http://localhost:8080/api/battle', {
                     inventory: JSON.stringify(inventory), round: round
                 });
                 const battleResult: BattleResult = response.data;
                 setResult(battleResult);
 
+                // Make the slot machine effect (rolling animation)
                 let ticks = 0;
                 const interval = setInterval(() => {
                     const randomGrid = Array(9).fill("").map(() => getItemIcon("Random"));
                     setDisplayGrid(randomGrid);
                     ticks++;
+                    // Stop rolling after a little while
                     if (ticks > 25) {
                         clearInterval(interval);
+                        // Show the real items
                         setDisplayGrid(battleResult.playerGrid.map(getItemIcon));
                         setLoading(false);
+                        // Give gold or take life
                         if (battleResult.playerWon) updateGold(10);
                         else { updateGold(10); updateLives(-1); }
                     }
                 }, 80);
-            } catch (e) { console.error(e); alert("错误"); navigate('/shop'); }
+            } catch (e) { 
+                console.error(e); 
+                alert("Error connecting to server"); 
+                navigate('/shop'); 
+            }
         };
         startBattle();
     }, [inventory, navigate, round, updateGold, updateLives]);
 
+    // Go to next round or Game Over
     const handleNext = () => {
         if (!result?.playerWon && lives - 1 <= 0) {
             alert("GAME OVER"); window.location.href = '/'; return;
@@ -65,7 +77,7 @@ export default function BattleScreen() {
             <h1 style={{ color: '#ff4444', marginBottom: 40 }}>⚔️ BATTLE START ⚔️</h1>
 
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: 20 }}>
-                {/* 玩家面板 */}
+                {/* Your Board */}
                 <div className="card" style={{ width: 200, borderColor: '#4a90e2' }}>
                     <h3 style={{ color: '#4a90e2' }}>YOU</h3>
                     <div style={{
@@ -86,7 +98,7 @@ export default function BattleScreen() {
 
                 <div style={{ alignSelf: 'center', fontSize: 40, color: '#ff4444', fontWeight: 900 }}>VS</div>
 
-                {/* 对手面板 */}
+                {/* Enemy Board */}
                 <div className="card" style={{ width: 200, borderColor: '#ff4444' }}>
                     <h3 style={{ color: '#ff4444' }}>ENEMY</h3>
                     <div style={{
@@ -107,7 +119,7 @@ export default function BattleScreen() {
                 </div>
             </div>
 
-            {/* 结果面板 */}
+            {/* Results Board */}
             {!loading && result && (
                 <div className="card" style={{ marginTop: 40, borderColor: result.playerWon ? 'gold' : 'gray', animation: 'popIn 0.5s' }}>
                     <h2 style={{ color: result.playerWon ? 'gold' : 'gray' }}>
@@ -125,6 +137,7 @@ export default function BattleScreen() {
     );
 }
 
+// Helper: Turns names into Pictures
 function getItemIcon(name: string) {
     if (name.includes("Sword")) return "⚔️";
     if (name.includes("Shield")) return "🛡️";

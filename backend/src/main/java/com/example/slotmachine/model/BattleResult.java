@@ -2,28 +2,29 @@ package com.example.slotmachine.model;
 
 import java.util.List;
 
-// 这个类就像一份“战报”，详细记录了战斗发生的一切
+// This class is like a "Report Card" of the fight.
+// It tells us everything that happened.
 public class BattleResult {
     
-    // 你的 9 个格子抽到了什么 (比如 ["Sword", "Shield", ...])
+    // What you had in your 9 slots (like ["Sword", "Shield", ...])
     private List<String> playerGrid;
     
-    // 对手的 9 个格子抽到了什么
+    // What the bad guy had in their 9 slots
     private List<String> opponentGrid;
     
-    // 你的总属性 (比如 "攻击: 15, 防御: 5")
+    // Your power numbers (like "ATK: 15, DEF: 5")
     private String playerStats;
     
-    // 对手的总属性
+    // The bad guy's power numbers
     private String opponentStats;
     
-    // 战斗日志 (比如 "你造成了 10 点伤害", "你赢了")
+    // The story of the fight (like "You hit him!", "He hit you!")
     private List<String> combatLog;
     
-    // 最终结果: true 代表你赢了，false 代表你输了
+    // Did you win? True means YES! False means Oh no...
     private boolean playerWon;
 
-    // --- 下面是手写的 Getters 和 Setters ---
+    // --- Helpers to get and set the data (Getters and Setters) ---
     public List<String> getPlayerGrid() { return playerGrid; }
     public void setPlayerGrid(List<String> playerGrid) { this.playerGrid = playerGrid; }
     

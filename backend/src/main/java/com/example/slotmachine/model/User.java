@@ -10,28 +10,28 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
-// @Data // 我们暂时不用 Lombok 这个魔法了，手动写 getter/setter 虽然麻烦点，但更稳健
-@Entity // 告诉 Java：这不仅仅是个代码，它对应数据库里的一张表，名字叫 user
-@Table(name = "users") // 给这张表起个名字叫 "users"
+// This is the "ID Card" for a player.
+@Entity // This tells Java: "This is a real thing we want to save."
+@Table(name = "users") // We put all cards in a drawer called "users"
 public class User {
 
-    @Id // 这是身份证号，每个人必须独一无二
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 身份证号自动生成，比如第一个人是1，第二个是2，不用我们操心
+    @Id // This is the unique number on the card.
+    @GeneratedValue(strategy = GenerationType.IDENTITY) // The machine stamps a new number automatically (1, 2, 3...)
     private Long id;
 
-    @Column(unique = true, nullable = false) // 名字必须唯一，而且不能为空（不能叫无名氏）
+    @Column(unique = true, nullable = false) // No two people can have the same name!
     private String username;
 
-    // 注册时间。LocalDateTime 就是“现在的年月日时分秒”
+    // When did this person join?
     private LocalDateTime createdAt;
 
-    // 这个方法会在泥人刚被捏出来存进数据库之前自动执行
+    // Before we save this card, we stamp the time on it.
     @PrePersist
     protected void onCreate() {
-        createdAt = LocalDateTime.now(); // 记下当前时间
+        createdAt = LocalDateTime.now(); 
     }
 
-    // --- 下面是手写的 Getters 和 Setters (取值和赋值的方法) ---
+    // --- Helpers to read and write on the card (Getters and Setters) ---
 
     public Long getId() {
         return id;

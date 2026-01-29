@@ -12,43 +12,45 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
-// @Data
+// This is a "Save File" or a "Photograph" of your game.
+// It remembers what items you had at a specific time.
 @Entity
-@Table(name = "game_snapshots") // 表名叫 game_snapshots
+@Table(name = "game_snapshots") // We call the box "game_snapshots" in the database
 public class GameSnapshot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 这里有个连线：这个快照属于哪个玩家？
-    // ManyToOne 的意思是：很多个快照可能都属于同一个玩家（因为玩家每玩一轮都会存个快照）
+    // Whose photo is this?
+    // Many photos can belong to ONE user.
     @ManyToOne 
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
-    // 这是第几轮？(1-10)
+    // Which level was this? (1, 2, 3...)
     private Integer roundNumber;
 
-    // 重点来了！我们要存装备池。
-    // 因为装备池是一个复杂的列表（比如有剑、盾、药水），很难用传统的表格存。
-    // 我们用 JSON 格式（就像一段长长的文本描述）来存。
-    // columnDefinition = "TEXT" 意思就是：给这一列很多很多空间，让我能写小作文
+    // Important! We need to save the list of items.
+    // Since a list is hard to put in a small box, we write it down as a long text (JSON).
+    // "TEXT" means: "Give me a huge piece of paper to write on!"
     @Column(columnDefinition = "TEXT") 
     private String inventoryJson; 
 
-    // 这里存这9个装备算出来的总属性（攻击力、防御力等），也是用长文本存
+    // We also save your power numbers here as text.
     @Column(columnDefinition = "TEXT")
     private String statsJson;
 
+    // When did we take this photo?
     private LocalDateTime createdAt;
 
+    // Before we put this in the box, we check the clock.
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
     }
 
-    // --- 下面是手写的 Getters 和 Setters ---
+    // --- Helpers to get and set the data (Getters and Setters) ---
 
     public Long getId() {
         return id;

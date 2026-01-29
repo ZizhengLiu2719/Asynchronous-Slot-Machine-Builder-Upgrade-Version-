@@ -3,9 +3,9 @@ import { createContext, useContext, useState, type ReactNode } from 'react';
 interface GameState {
   gold: number;
   lives: number;
-  inventory: string[]; // 你的背包，最多20个
-  addToInventory: (item: string) => boolean; // 买东西方法
-  removeFromInventory: (index: number) => void; // 卖东西方法
+  inventory: string[]; // Backpack (Inventory): Just like your school bag, holds up to 20 toys.
+  addToInventory: (item: string) => boolean; // Buy: Put a toy in your bag.
+  removeFromInventory: (index: number) => void; // Sell: Take a toy out of your bag.
   updateGold: (amount: number) => void;
   updateLives: (amount: number) => void;
 }
@@ -13,17 +13,17 @@ interface GameState {
 const GameContext = createContext<GameState | undefined>(undefined);
 
 export function GameProvider({ children }: { children: ReactNode }) {
-  const [gold, setGold] = useState(10); // 初始 10 金币
-  const [lives, setLives] = useState(3); // 初始 3 条命
-  const [inventory, setInventory] = useState<string[]>([]); // 初始空背包
+  const [gold, setGold] = useState(10); // Start with 10 Gold Coins
+  const [lives, setLives] = useState(3); // Start with 3 Hearts
+  const [inventory, setInventory] = useState<string[]>([]); // Empty bag at the start
 
   const addToInventory = (item: string) => {
     if (inventory.length >= 20) {
-      alert("背包满了！");
+      alert("Backpack full!");
       return false;
     }
     if (gold < 3) {
-      alert("金币不足！(每个 3 金币)");
+      alert("Not enough gold! (3 gold each)");
       return false;
     }
     setInventory([...inventory, item]);
@@ -35,7 +35,7 @@ export function GameProvider({ children }: { children: ReactNode }) {
     const newInv = [...inventory];
     newInv.splice(index, 1);
     setInventory(newInv);
-    setGold(gold + 3); // 原价回收
+    setGold(gold + 3); // Full refund!
   };
 
   return (
