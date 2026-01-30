@@ -22,6 +22,12 @@ export default function BattleScreen() {
     const hasStarted = useRef(false);
 
     useEffect(() => {
+        if (result) {
+            console.log("Result updated:", result.playerName, result.opponentName);
+        }
+    }, [result]);
+    
+    useEffect(() => {
         // Only start the fight once!
         if (hasStarted.current) return;
         hasStarted.current = true;
