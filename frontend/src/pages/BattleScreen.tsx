@@ -8,6 +8,7 @@ interface BattleResult {
     playerGrid: string[]; opponentGrid: string[];
     playerStats: string; opponentStats: string;
     combatLog: string[]; playerWon: boolean;
+    playerName: string; opponentName: string;
 }
 
 export default function BattleScreen() {
@@ -17,6 +18,7 @@ export default function BattleScreen() {
     const [result, setResult] = useState<BattleResult | null>(null);
     const [displayGrid, setDisplayGrid] = useState<string[]>(Array(9).fill("❓")); // Mystery boxes
     const round = localStorage.getItem('round') || '1';
+    const username = localStorage.getItem('username') || 'Hero';
     const hasStarted = useRef(false);
 
     useEffect(() => {
@@ -28,7 +30,9 @@ export default function BattleScreen() {
             try {
                 // Send our backpack to the server and ask: "Did I win?"
                 const response = await axios.post('http://localhost:8080/api/battle', {
-                    inventory: JSON.stringify(inventory), round: round
+                    inventory: JSON.stringify(inventory), 
+                    round: round,
+                    username: username
                 });
                 const battleResult: BattleResult = response.data;
                 setResult(battleResult);
@@ -100,7 +104,7 @@ export default function BattleScreen() {
 
                 {/* Enemy Board */}
                 <div className="card" style={{ width: 200, borderColor: '#ff4444' }}>
-                    <h3 style={{ color: '#ff4444' }}>ENEMY</h3>
+                    <h3 style={{ color: '#ff4444' }}>{result?.opponentName || "ENEMY"}</h3>
                     <div style={{
                         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5,
                         background: '#000', padding: 5, border: '2px solid #333',

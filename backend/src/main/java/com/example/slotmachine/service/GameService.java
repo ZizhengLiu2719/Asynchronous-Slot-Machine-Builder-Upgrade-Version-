@@ -161,10 +161,14 @@ public class GameService {
     
     // --- The Real Fight Calculator ---
     // This takes your backpack and the bad guy's backpack and sees who wins
-    public BattleResult calculateBattle(String playerInventoryJson, String opponentInventoryJson) {
+    public BattleResult calculateBattle(String playerInventoryJson, String opponentInventoryJson, String playerName, String opponentName) {
         BattleResult result = new BattleResult();
         List<String> logs = new ArrayList<>();
         Random random = new Random();
+
+        // Set names
+        result.setPlayerName(playerName != null ? playerName : "You");
+        result.setOpponentName(opponentName != null ? opponentName : "Unknown Enemy");
 
         try {
             // 1. Open the backpacks (turn text into lists)
@@ -176,9 +180,10 @@ public class GameService {
                 opponentPool = new ArrayList<>();
                 for(int i=0; i<5; i++) opponentPool.add("Dagger");
                 logs.add("No opponent found. Fighting a Training Dummy...");
+                result.setOpponentName("Training Dummy");
             } else {
                 opponentPool = objectMapper.readValue(opponentInventoryJson, new TypeReference<List<String>>(){});
-                logs.add("Opponent found!");
+                logs.add("Opponent found: " + result.getOpponentName() + "!");
             }
 
             // 2. Spin the Slot Machine! (Pick 9 items randomly)

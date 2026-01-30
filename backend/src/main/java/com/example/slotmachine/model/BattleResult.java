@@ -24,6 +24,10 @@ public class BattleResult {
     // Did you win? True means YES! False means Oh no...
     private boolean playerWon;
 
+    // Names
+    private String playerName;
+    private String opponentName;
+
     // --- Helpers to get and set the data (Getters and Setters) ---
     public List<String> getPlayerGrid() { return playerGrid; }
     public void setPlayerGrid(List<String> playerGrid) { this.playerGrid = playerGrid; }
@@ -42,4 +46,10 @@ public class BattleResult {
     
     public boolean isPlayerWon() { return playerWon; }
     public void setPlayerWon(boolean playerWon) { this.playerWon = playerWon; }
+
+    public String getPlayerName() { return playerName; }
+    public void setPlayerName(String playerName) { this.playerName = playerName; }
+
+    public String getOpponentName() { return opponentName; }
+    public void setOpponentName(String opponentName) { this.opponentName = opponentName; }
 }

@@ -72,17 +72,24 @@ public class GameController {
     // 5. The Arena (Main Fight)
     // Someone says: "I want to fight! Here is my bag of items."
     // Request: POST /api/battle
-    // Box contents: { "inventory": "['Sword', ...]", "round": 1 }
+    // Box contents: { "inventory": "['Sword', ...]", "round": 1, "username": "HeroName" }
     @PostMapping("/battle")
     public BattleResult fight(@RequestBody Map<String, Object> payload) {
         String inventoryJson = payload.get("inventory").toString();
         int round = Integer.parseInt(payload.get("round").toString());
+        String playerName = payload.getOrDefault("username", "Hero").toString();
         
         // 1. Find a bad guy to fight
         GameSnapshot opponent = gameService.findOpponent(round);
-        String opponentInventory = (opponent != null) ? opponent.getInventoryJson() : null;
+        String opponentInventory = null;
+        String opponentName = "Training Dummy";
+
+        if (opponent != null) {
+            opponentInventory = opponent.getInventoryJson();
+            opponentName = opponent.getUser().getUsername();
+        }
         
         // 2. Start the math fight!
-        return gameService.calculateBattle(inventoryJson, opponentInventory);
+        return gameService.calculateBattle(inventoryJson, opponentInventory, playerName, opponentName);
     }
 }
