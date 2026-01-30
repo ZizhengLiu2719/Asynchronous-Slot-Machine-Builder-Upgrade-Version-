@@ -1,0 +1,13 @@
+# PostgreSQL data directory
+data/postgres/
+
+# IDE and Editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+Thumbs.db
