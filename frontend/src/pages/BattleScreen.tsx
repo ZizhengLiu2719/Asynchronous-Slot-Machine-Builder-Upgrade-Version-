@@ -83,7 +83,7 @@ export default function BattleScreen() {
             <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-start', gap: 20 }}>
                 {/* Your Board */}
                 <div className="card" style={{ width: 200, borderColor: '#4a90e2' }}>
-                    <h3 style={{ color: '#4a90e2' }}>YOU</h3>
+                    <h3 style={{ color: '#4a90e2' }}>{result?.playerName || username}</h3>
                     <div style={{
                         display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 5,
                         background: '#000', padding: 5, border: '2px solid #333'
